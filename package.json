@@ -1,13 +1,34 @@
 {
   "name": "pussh",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "SSH 기반 파일 동기화 및 배포 도구",
+  "main": "lib/index.js",
+  "bin": {
+    "pussh": "bin/pussh.js"
+  },
   "scripts": {
+    "start": "node bin/pussh.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "ssh",
+    "deploy",
+    "file-sync",
+    "cli"
+  ],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^11.0.0",
+    "diff": "^5.1.0",
+    "fast-glob": "^3.3.2",
+    "inquirer": "^8.2.5",
+    "node-ssh": "^13.0.0",
+    "ora": "^5.4.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
 }
