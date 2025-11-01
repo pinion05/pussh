@@ -1,5 +1,8 @@
 # Pussh - SSH 파일 동기화 도구
 
+[![npm version](https://badge.fury.io/js/pussh.svg)](https://badge.fury.io/js/pussh)
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+
 SSH를 통해 원격 서버와 로컬 파일을 간편하게 비교하고 동기화하는 CLI 도구입니다.
 
 ## 기능

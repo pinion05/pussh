@@ -19,8 +19,6 @@ yarn-error.log*
 index.html
 app.js
 style.css
-package.json
-README.md
 
 # 설정 파일
 .env

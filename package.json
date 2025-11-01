@@ -3,6 +3,7 @@
   "version": "1.1.2",
   "description": "SSH 기반 파일 동기화 및 배포 도구",
   "main": "lib/index.js",
+  "readme": "README.md",
   "bin": {
     "pussh": "bin/pussh.js"
   },
@@ -16,8 +17,13 @@
     "file-sync",
     "cli"
   ],
-  "author": "",
+  "author": "pinion05",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pinion05/pussh.git"
+  },
+  "homepage": "https://github.com/pinion05/pussh#readme",
   "type": "commonjs",
   "dependencies": {
     "chalk": "^4.1.2",
