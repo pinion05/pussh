@@ -18,7 +18,7 @@ function showBanner() {
 program
   .name('pussh')
   .description('SSH 기반 파일 동기화 및 배포 도구')
-  .version('1.1.1')
+  .version('1.1.2')
   .addHelpCommand('help [command]', '특정 명령어의 상세 도움말을 표시합니다');
 
 // Banner를 먼저 출력하도록 커스터마이징

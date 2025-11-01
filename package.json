@@ -1,6 +1,6 @@
 {
   "name": "pussh",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "SSH 기반 파일 동기화 및 배포 도구",
   "main": "lib/index.js",
   "bin": {
