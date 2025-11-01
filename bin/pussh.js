@@ -18,7 +18,7 @@ function showBanner() {
 program
   .name('pussh')
   .description('SSH 기반 파일 동기화 및 배포 도구')
-  .version('1.1.2')
+  .version('1.2.0')
   .addHelpCommand('help [command]', '특정 명령어의 상세 도움말을 표시합니다');
 
 // Banner를 먼저 출력하도록 커스터마이징
@@ -60,34 +60,34 @@ SSH 서버에 로그인하고 세션 정보를 저장합니다.
 // Diff command
 program
   .command('diff <file>')
-  .option('-m, --method <method>', '비교 방식: hash, date, content, size (기본: content)', 'content')
   .description(`
-로컬 파일과 원격 서버의 파일을 비교합니다.
-서버에서 동일한 파일명을 재귀적으로 검색하여 비교합니다.
+로컬 파일과 원격 서버의 파일을 종합적으로 비교합니다.
+서버에서 동일한 파일명을 재귀적으로 검색하여 모든 비교 방식을 수행합니다.
 
-비교 방식:
-  hash     - MD5 해시값으로 빠르게 비교
-  date     - 파일 수정 시간으로 비교
-  size     - 파일 크기로 비교
-  content  - 파일 내용을 상세하게 비교 (Git diff 스타일, 기본값)
+비교 방식 (자동 수행):
+  • 크기   - 파일 크기 비교 (즉시)
+  • 시간   - 수정 시간 비교 (즉시)
+  • 해시   - MD5 해시값 비교 (빠름)
+  • 내용   - 파일 내용 상세 비교 (Git diff 스타일)
 
 예제:
   pussh diff ./index.html
-  pussh diff ./app.js -m hash
-  pussh diff ./style.css -m date
-  pussh diff ./config.json -m size
+  pussh diff ./app.js
+  pussh diff ./style.css
 
 동작 방식:
   1. 로컬 파일 존재 확인
   2. 원격 서버에서 동일 파일명 검색
-  3. 선택된 방식으로 파일 비교
-  4. 비교 결과 출력
+  3. 모든 비교 방식 자동 수행
+  4. 종합 결과 출력 (요약 + 상세)
 
-옵션:
-  -m, --method <method>  비교 방식을 선택합니다 (hash/date/content/size)
+특징:
+  • 하나의 명령으로 모든 비교 수행
+  • 일부 비교 실패 시에도 다른 정보 제공
+  • 명확한 요약과 상세 내용 표시
   `.trim())
-  .action((file, options) => {
-    diffCommand(file, options).catch(err => {
+  .action((file) => {
+    diffCommand(file, {}).catch(err => {
       console.error(chalk.red('❌ 오류:'), err.message);
       process.exit(1);
     });
@@ -138,13 +138,13 @@ if (!process.argv.slice(2).length) {
   console.log('');
   console.log(chalk.yellow('명령어:'));
   console.log(chalk.white('  login <host> <password>  SSH 서버에 로그인하고 세션 저장'));
-  console.log(chalk.white('  diff <file>              로컬과 원격 파일 비교'));
+  console.log(chalk.white('  diff <file>              로컬과 원격 파일 종합 비교'));
   console.log(chalk.white('  push <file>              로컬 파일을 원격 서버에 업로드'));
   console.log(chalk.white('  help [command]           명령어 도움말 표시'));
   console.log('');
   console.log(chalk.yellow('예제:'));
   console.log(chalk.white('  pussh login root@server.com \'password\' -d ~/project'));
-  console.log(chalk.white('  pussh diff ./index.html -m hash'));
+  console.log(chalk.white('  pussh diff ./index.html'));
   console.log(chalk.white('  pussh push ./app.js -f'));
   console.log('');
   console.log(chalk.gray('자세한 도움말: pussh help <command>'));
