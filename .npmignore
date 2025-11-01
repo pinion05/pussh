@@ -1,0 +1,34 @@
+# 테스트 파일
+test-files/
+*.test.js
+test/
+
+# 도커 관련
+Dockerfile
+docker-compose.yml
+
+# 개발 관련
+.git/
+.gitignore
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 테스트용 생성 파일
+index.html
+app.js
+style.css
+package.json
+README.md
+
+# 설정 파일
+.env
+.env.local
+.env.*.local
+
+# 임시 파일
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
