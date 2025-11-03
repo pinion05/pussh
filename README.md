@@ -9,6 +9,7 @@ A CLI tool for easily comparing and synchronizing local files with remote server
 
 - **Login** (`pussh login`) - Login to SSH server and save session
 - **File Comparison** (`pussh diff`) - Comprehensively compare local and remote files (size, time, hash, content)
+- **Directory Comparison** (`pussh compare`) - Recursively compare local and remote directories with detailed reports
 - **File Upload** (`pussh push`) - Upload local files to remote server (automatic backup)
 - **Server Management** (`pussh server`) - Manage named server profiles (list/add/remove/default)
 
@@ -100,7 +101,64 @@ pussh diff ./app.js
 pussh diff ./style.css
 ```
 
-### 3. File Upload
+### 3. Directory Comparison
+
+Recursively compare local and remote directories to identify all differences.
+Automatically categorizes files as added (local only), deleted (remote only), modified, or identical.
+
+```bash
+pussh compare ./src ~/remote/src
+```
+
+**Features:**
+- Recursively scan both directories
+- Support for `.pusshignore` patterns (similar to `.gitignore`)
+- File size and modification time comparison
+- Categorize changes: added, deleted, modified, identical
+- Detailed reports with file sizes and timestamps
+
+**How it works:**
+1. Scan local directory with `.pusshignore` filtering
+2. Scan remote directory with default exclusions
+3. Compare file lists and categorize differences
+4. Show statistics and detailed change information
+
+**Output Categories:**
+- ➕ **Added** - Files existing only locally (not synchronized to remote)
+- ➖ **Deleted** - Files existing only remotely (local deletion)
+- ✏️ **Modified** - Files with different size or modification time
+- ✓ **Identical** - Files synchronized
+
+**Examples:**
+```bash
+# Compare specific directories
+pussh compare ./src ~/remote/src
+
+# Compare current directory with remote default directory
+pussh compare . .
+
+# Compare project directories
+pussh compare ./app ~/project/app
+```
+
+**Ignore Patterns (.pusshignore):**
+Create `.pusshignore` in the local directory to exclude files from comparison:
+```
+node_modules/
+.git/
+dist/
+build/
+*.log
+.DS_Store
+.vscode/
+```
+
+Default exclusions (always applied):
+- node_modules/, .git/, dist/, build/
+- .DS_Store, *.swp, *~
+- .vscode/, .idea/
+
+### 4. File Upload
 
 Upload local files to the remote server.
 
@@ -132,6 +190,7 @@ pussh help
 # Specific command help
 pussh help login
 pussh help diff
+pussh help compare
 pussh help push
 ```
 

@@ -5,6 +5,7 @@ const chalk = require('chalk');
 const figlet = require('figlet');
 const loginCommand = require('../lib/commands/login');
 const diffCommand = require('../lib/commands/diff');
+const compareCommand = require('../lib/commands/compare');
 const pushCommand = require('../lib/commands/push');
 const serverCommands = require('../lib/commands/server');
 
@@ -91,6 +92,40 @@ Features:
   `.trim())
   .action((file) => {
     diffCommand(file, {}).catch(err => {
+      console.error(chalk.red('❌ Error:'), err.message);
+      process.exit(1);
+    });
+  });
+
+// Compare directories command
+program
+  .command('compare <local> <remote>')
+  .description(`
+Compare local and remote directories recursively.
+Displays differences between directory contents including added, deleted, and modified files.
+
+Directory comparison:
+  • Recursively scans both directories
+  • Supports .pusshignore patterns
+  • Shows file size and modification time differences
+  • Categorizes changes: added, deleted, modified, identical
+
+Examples:
+  pussh compare ./src ~/remote/src          # Compare specific directories
+  pussh compare . .                         # Compare current directory with remote default
+
+Output:
+  ➕ Added - Files existing only locally (not pushed yet)
+  ➖ Deleted - Files existing only remotely
+  ✏️ Modified - Files with size or time differences
+  ✓ Identical - Files synchronized
+
+Ignore patterns:
+  Create .pusshignore in the local directory to exclude files
+  Example: node_modules/, .git/, *.log, .DS_Store
+  `.trim())
+  .action((local, remote, options) => {
+    compareCommand(local, remote, options).catch(err => {
       console.error(chalk.red('❌ Error:'), err.message);
       process.exit(1);
     });
@@ -186,16 +221,18 @@ if (!process.argv.slice(2).length) {
   console.log(chalk.white('  pussh <command> [options]'));
   console.log('');
   console.log(chalk.yellow('Commands:'));
-  console.log(chalk.white('  login <host> <password>  Login to SSH server and save session'));
-  console.log(chalk.white('  diff <file>              Comprehensive comparison of local and remote files'));
-  console.log(chalk.white('  push <file>              Upload local files to remote server'));
-  console.log(chalk.white('  server <command>         Server management (list/add/remove/default)'));
-  console.log(chalk.white('  help [command]           Show command help'));
+  console.log(chalk.white('  login <host> <password>   Login to SSH server and save session'));
+  console.log(chalk.white('  diff <file>                Comprehensive comparison of local and remote files'));
+  console.log(chalk.white('  compare <local> <remote>   Compare directories recursively'));
+  console.log(chalk.white('  push <file>                Upload local files to remote server'));
+  console.log(chalk.white('  server <command>           Server management (list/add/remove/default)'));
+  console.log(chalk.white('  help [command]             Show command help'));
   console.log('');
   console.log(chalk.yellow('Examples:'));
   console.log(chalk.white('  pussh login root@server.com \'password\' -d ~/project'));
   console.log(chalk.white('  pussh login production                    # Use registered server'));
   console.log(chalk.white('  pussh diff ./index.html'));
+  console.log(chalk.white('  pussh compare ./src ~/remote/src'));
   console.log(chalk.white('  pussh push ./app.js -f'));
   console.log(chalk.white('  pussh server list'));
   console.log(chalk.white('  pussh server add production'));
