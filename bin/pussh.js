@@ -6,6 +6,7 @@ const figlet = require('figlet');
 const loginCommand = require('../lib/commands/login');
 const diffCommand = require('../lib/commands/diff');
 const pushCommand = require('../lib/commands/push');
+const serverCommands = require('../lib/commands/server');
 
 function showBanner() {
   console.log(chalk.cyan(figlet.textSync('Pussh', {
@@ -31,20 +32,22 @@ program.outputHelp = function(cb) {
 
 // Login command
 program
-  .command('login <host> <password>')
+  .command('login <host> [password]')
   .option('-d, --directory <dir>', 'Set default working directory on server (default: home directory)')
   .description(`
 Login to SSH server and save session information.
 After login, you can immediately use diff and push commands.
 
 Host format:
-  user@hostname          - Port 22 (default)
-  user@hostname:port    - Custom port specification
+  user@hostname          - Direct SSH connection
+  user@hostname:port    - Direct SSH with custom port
+  server_name           - Use registered server (from 'pussh server list')
 
 Examples:
   pussh login root@server.com 'password'
   pussh login user@server.com:2222 'password' -d ~/project
-  pussh login admin@192.168.1.100 'mypass' -d /var/www/html
+  pussh login production                    # Use registered server
+  pussh login staging -d /var/www/html      # Use registered server with custom directory
 
 Options:
   -d, --directory <dir>  Set default working directory on server
@@ -128,6 +131,52 @@ Options:
     });
   });
 
+// Server management commands
+const serverCommand = program
+  .command('server')
+  .description('Server management commands');
+
+serverCommand
+  .command('list')
+  .description('List all registered servers')
+  .action(() => {
+    serverCommands.listServersCommand().catch(err => {
+      console.error(chalk.red('❌ Error:'), err.message);
+      process.exit(1);
+    });
+  });
+
+serverCommand
+  .command('add [name]')
+  .description('Add a new server (interactive)')
+  .action((name) => {
+    serverCommands.addServerCommand(name).catch(err => {
+      console.error(chalk.red('❌ Error:'), err.message);
+      process.exit(1);
+    });
+  });
+
+serverCommand
+  .command('remove <name>')
+  .description('Remove a server')
+  .option('--confirm', 'Skip confirmation prompt and remove server immediately')
+  .action((name, options) => {
+    serverCommands.removeServerCommand(name, options).catch(err => {
+      console.error(chalk.red('❌ Error:'), err.message);
+      process.exit(1);
+    });
+  });
+
+serverCommand
+  .command('default <name>')
+  .description('Set default server')
+  .action((name) => {
+    serverCommands.setDefaultServerCommand(name).catch(err => {
+      console.error(chalk.red('❌ Error:'), err.message);
+      process.exit(1);
+    });
+  });
+
 program.parse(process.argv);
 
 if (!process.argv.slice(2).length) {
@@ -140,12 +189,17 @@ if (!process.argv.slice(2).length) {
   console.log(chalk.white('  login <host> <password>  Login to SSH server and save session'));
   console.log(chalk.white('  diff <file>              Comprehensive comparison of local and remote files'));
   console.log(chalk.white('  push <file>              Upload local files to remote server'));
+  console.log(chalk.white('  server <command>         Server management (list/add/remove/default)'));
   console.log(chalk.white('  help [command]           Show command help'));
   console.log('');
   console.log(chalk.yellow('Examples:'));
   console.log(chalk.white('  pussh login root@server.com \'password\' -d ~/project'));
+  console.log(chalk.white('  pussh login production                    # Use registered server'));
   console.log(chalk.white('  pussh diff ./index.html'));
   console.log(chalk.white('  pussh push ./app.js -f'));
+  console.log(chalk.white('  pussh server list'));
+  console.log(chalk.white('  pussh server add production'));
+  console.log(chalk.white('  pussh server remove test --confirm'));
   console.log('');
   console.log(chalk.gray('For detailed help: pussh help <command>'));
   console.log('');
