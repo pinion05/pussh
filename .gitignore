@@ -16,3 +16,4 @@ build/
 .pushbackup
 test-*.js
 AGENTS.md
+CLAUDE.md
