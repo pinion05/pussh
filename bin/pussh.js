@@ -17,9 +17,9 @@ function showBanner() {
 
 program
   .name('pussh')
-  .description('SSH 기반 파일 동기화 및 배포 도구')
+  .description('SSH-based file synchronization and deployment tool')
   .version('1.2.0')
-  .addHelpCommand('help [command]', '특정 명령어의 상세 도움말을 표시합니다');
+  .addHelpCommand('help [command]', 'Show detailed help for a specific command');
 
 // Banner를 먼저 출력하도록 커스터마이징
 const originalOutputHelp = program.outputHelp;
@@ -32,27 +32,27 @@ program.outputHelp = function(cb) {
 // Login command
 program
   .command('login <host> <password>')
-  .option('-d, --directory <dir>', '서버의 기본 작업 디렉토리 설정 (기본: 홈 디렉토리)')
+  .option('-d, --directory <dir>', 'Set default working directory on server (default: home directory)')
   .description(`
-SSH 서버에 로그인하고 세션 정보를 저장합니다.
-로그인 후 diff, push 명령어를 바로 사용할 수 있습니다.
+Login to SSH server and save session information.
+After login, you can immediately use diff and push commands.
 
-호스트 형식:
-  user@hostname          - 포트 22 (기본값)
-  user@hostname:port    - 커스텀 포트 지정
+Host format:
+  user@hostname          - Port 22 (default)
+  user@hostname:port    - Custom port specification
 
-예제:
+Examples:
   pussh login root@server.com 'password'
   pussh login user@server.com:2222 'password' -d ~/project
   pussh login admin@192.168.1.100 'mypass' -d /var/www/html
 
-옵션:
-  -d, --directory <dir>  서버의 기본 작업 디렉토리를 설정합니다
-                        파일 검색 및 업로드의 기준 경로가 됩니다
+Options:
+  -d, --directory <dir>  Set default working directory on server
+                        Base path for file search and upload
   `.trim())
   .action((host, password, options) => {
     loginCommand(host, password, options).catch(err => {
-      console.error(chalk.red('❌ 오류:'), err.message);
+      console.error(chalk.red('❌ Error:'), err.message);
       process.exit(1);
     });
   });
@@ -61,34 +61,34 @@ SSH 서버에 로그인하고 세션 정보를 저장합니다.
 program
   .command('diff <file>')
   .description(`
-로컬 파일과 원격 서버의 파일을 종합적으로 비교합니다.
-서버에서 동일한 파일명을 재귀적으로 검색하여 모든 비교 방식을 수행합니다.
+Comprehensively compare local files with remote server files.
+Recursively searches for files with the same name on the server and performs all comparison methods.
 
-비교 방식 (자동 수행):
-  • 크기   - 파일 크기 비교 (즉시)
-  • 시간   - 수정 시간 비교 (즉시)
-  • 해시   - MD5 해시값 비교 (빠름)
-  • 내용   - 파일 내용 상세 비교 (Git diff 스타일)
+Comparison methods (automatically performed):
+  • Size   - File size comparison (instant)
+  • Time   - Modification time comparison (instant)
+  • Hash   - MD5 hash value comparison (fast)
+  • Content - Detailed file content comparison (Git diff style)
 
-예제:
+Examples:
   pussh diff ./index.html
   pussh diff ./app.js
   pussh diff ./style.css
 
-동작 방식:
-  1. 로컬 파일 존재 확인
-  2. 원격 서버에서 동일 파일명 검색
-  3. 모든 비교 방식 자동 수행
-  4. 종합 결과 출력 (요약 + 상세)
+How it works:
+  1. Check local file existence
+  2. Search for files with same name on remote server
+  3. Automatically perform all comparison methods
+  4. Display comprehensive results (summary + details)
 
-특징:
-  • 하나의 명령으로 모든 비교 수행
-  • 일부 비교 실패 시에도 다른 정보 제공
-  • 명확한 요약과 상세 내용 표시
+Features:
+  • Perform all comparisons with a single command
+  • Provide other information even if some comparisons fail
+  • Clear summary and detailed content display
   `.trim())
   .action((file) => {
     diffCommand(file, {}).catch(err => {
-      console.error(chalk.red('❌ 오류:'), err.message);
+      console.error(chalk.red('❌ Error:'), err.message);
       process.exit(1);
     });
   });
@@ -96,34 +96,34 @@ program
 // Push command
 program
   .command('push <file>')
-  .option('-f, --force', '확인 없이 강제 업로드')
+  .option('-f, --force', 'Force upload without confirmation')
   .description(`
-로컬 파일을 원격 서버에 업로드합니다.
-업로드 전 자동으로 백업 파일을 생성합니다.
+Upload local files to remote server.
+Automatically creates backup files before upload.
 
-동작 과정:
-  1. 로컬 파일 존재 확인
-  2. 원격 서버에서 동일 파일명 검색
-  3. 여러 파일 발견 시 대화형 선택
-  4. 기존 파일 있으면 백업 생성 (.pushbackup)
-  5. 파일 업로드 및 검증
+Process:
+  1. Check local file existence
+  2. Search for files with same name on remote server
+  3. Interactive selection if multiple files found
+  4. Create backup if existing file (.pushbackup)
+  5. File upload and verification
 
-백업 정책:
-  원격: filename.pushbackup
-  로컬: filename.pushbackup
+Backup policy:
+  Remote: filename.pushbackup
+  Local: filename.pushbackup
 
-예제:
+Examples:
   pussh push ./index.html
   pussh push ./app.js -f
   pussh push ./config.json
 
-옵션:
-  -f, --force  확인 프롬프트를 건너뛰고 바로 업로드합니다
-                자동화 스크립트에서 유용합니다
+Options:
+  -f, --force  Skip confirmation prompt and upload immediately
+                Useful for automation scripts
   `.trim())
   .action((file, options) => {
     pushCommand(file, options).catch(err => {
-      console.error(chalk.red('❌ 오류:'), err.message);
+      console.error(chalk.red('❌ Error:'), err.message);
       process.exit(1);
     });
   });
@@ -133,21 +133,21 @@ program.parse(process.argv);
 if (!process.argv.slice(2).length) {
   showBanner();
   console.log('');
-  console.log(chalk.yellow('사용법:'));
+  console.log(chalk.yellow('Usage:'));
   console.log(chalk.white('  pussh <command> [options]'));
   console.log('');
-  console.log(chalk.yellow('명령어:'));
-  console.log(chalk.white('  login <host> <password>  SSH 서버에 로그인하고 세션 저장'));
-  console.log(chalk.white('  diff <file>              로컬과 원격 파일 종합 비교'));
-  console.log(chalk.white('  push <file>              로컬 파일을 원격 서버에 업로드'));
-  console.log(chalk.white('  help [command]           명령어 도움말 표시'));
+  console.log(chalk.yellow('Commands:'));
+  console.log(chalk.white('  login <host> <password>  Login to SSH server and save session'));
+  console.log(chalk.white('  diff <file>              Comprehensive comparison of local and remote files'));
+  console.log(chalk.white('  push <file>              Upload local files to remote server'));
+  console.log(chalk.white('  help [command]           Show command help'));
   console.log('');
-  console.log(chalk.yellow('예제:'));
+  console.log(chalk.yellow('Examples:'));
   console.log(chalk.white('  pussh login root@server.com \'password\' -d ~/project'));
   console.log(chalk.white('  pussh diff ./index.html'));
   console.log(chalk.white('  pussh push ./app.js -f'));
   console.log('');
-  console.log(chalk.gray('자세한 도움말: pussh help <command>'));
+  console.log(chalk.gray('For detailed help: pussh help <command>'));
   console.log('');
   process.exit(0);
 }
