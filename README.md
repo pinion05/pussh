@@ -1,168 +1,211 @@
-# Pussh - SSH 파일 동기화 도구
+# Pussh - SSH File Synchronization Tool
 
 [![npm version](https://badge.fury.io/js/pussh.svg)](https://badge.fury.io/js/pussh)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 
-SSH를 통해 원격 서버와 로컬 파일을 간편하게 비교하고 동기화하는 CLI 도구입니다.
+A CLI tool for easily comparing and synchronizing local files with remote servers via SSH.
 
-## 기능
+## Features
 
-- **로그인** (`pussh login`) - SSH 서버에 로그인하고 세션 저장
-- **파일 비교** (`pussh diff`) - 로컬과 원격 파일 비교 (해시, 날짜, 내용, 크기)
-- **파일 업로드** (`pussh push`) - 로컬 파일을 원격 서버에 업로드 (자동 백업)
+- **Login** (`pussh login`) - Login to SSH server and save session
+- **File Comparison** (`pussh diff`) - Comprehensively compare local and remote files (size, time, hash, content)
+- **File Upload** (`pussh push`) - Upload local files to remote server (automatic backup)
+- **Server Management** (`pussh server`) - Manage named server profiles (list/add/remove/default)
 
-## 설치
+## Installation
 
-### npm 패키지로 설치
+### Install as npm package
 
 ```bash
 npm install -g pussh
 ```
 
-### 로컬 설치 (개발 중)
+### Local installation (for development)
 
 ```bash
-# 저장소 클론
+# Clone repository
 git clone <repository-url>
 cd pussh
 
-# 의존성 설치
+# Install dependencies
 npm install
 
-# 전역 설치 (선택사항)
+# Global installation (optional)
 npm link
 ```
 
-## 사용 방법
+## Usage
 
-### 1. 로그인
+### 1. Login
 
-SSH 서버에 로그인하고 기본 디렉토리를 설정합니다.
+Login to SSH server and save session information. After login, you can immediately use diff and push commands.
 
 ```bash
 pussh login user@server.com 'password' -d ~/project1
 ```
 
-**호스트 형식:**
-- `user@hostname` - 포트 22 (기본값)
-- `user@hostname:port` - 커스텀 포트
+**Host format:**
+- `user@hostname` - Direct SSH connection (port 22 by default)
+- `user@hostname:port` - Direct SSH with custom port
+- `server_name` - Use registered server profile (from `pussh server list`)
 
-**옵션:**
-- `-d, --directory <dir>` - 서버의 기본 디렉토리 설정 (기본: 홈 디렉토리)
+**Options:**
+- `-d, --directory <dir>` - Set default working directory on server (default: home directory)
 
-**예제:**
+**Examples:**
 ```bash
-# 포트 22로 로그인
+# Direct login with port 22
 pussh login root@211.254.221.78 'password' -d ~/myproject
 
-# 커스텀 포트(1622)로 로그인
+# Login with custom port (1622)
 pussh login root@211.254.221.78:1622 'password' -d ~/myproject
 
-# 로그인 후 다른 명령어들을 사용할 수 있습니다
+# Login using registered server profile
+pussh login production -d /var/www/html
+
+# After login, you can use other commands
+pussh diff ./index.html
+pussh push ./app.js
 ```
 
-### 2. 파일 비교
+### 2. File Comparison
 
-로컬 파일과 원격 서버의 파일을 비교합니다.
+Comprehensively compare local files with remote server files. Automatically performs all comparison methods and displays results.
 
 ```bash
 pussh diff ./index.html
 ```
 
-**옵션:**
-- `-m, --method <method>` - 비교 방식 선택 (기본: content)
-  - `hash` - MD5 해시 비교
-  - `date` - 수정 시간 비교
-  - `size` - 파일 크기 비교
-  - `content` - 실제 내용 비교 (Git diff 스타일)
+**Comparison methods (automatically performed):**
+- **Size** - File size comparison (instant)
+- **Time** - Modification time comparison (instant)
+- **Hash** - MD5 hash value comparison (fast)
+- **Content** - Detailed file content comparison (Git diff style)
 
-**예제:**
+**How it works:**
+1. Check local file existence
+2. Search for files with same name on remote server
+3. Automatically perform all comparison methods
+4. Display comprehensive results (summary + details)
+
+**Examples:**
 ```bash
-# 내용으로 비교 (상세한 diff 출력)
+# Comprehensive comparison (all methods)
 pussh diff ./index.html
 
-# 해시로 빠르게 비교
-pussh diff ./index.html -m hash
+# Compare another file
+pussh diff ./app.js
 
-# 수정 시간으로 비교
-pussh diff ./index.html -m date
-
-# 파일 크기로 비교
-pussh diff ./index.html -m size
+# Compare CSS file
+pussh diff ./style.css
 ```
 
-### 3. 파일 업로드
+### 3. File Upload
 
-로컬 파일을 원격 서버에 업로드합니다.
+Upload local files to the remote server.
 
 ```bash
 pussh push ./index.html
 ```
 
-**옵션:**
-- `-f, --force` - 확인 없이 강제 업로드
+**Options:**
+- `-f, --force` - Force upload without confirmation
 
-**예제:**
+**Examples:**
 ```bash
-# 업로드 전 확인
+# Upload with confirmation
 pussh push ./index.html
 
-# 강제 업로드 (확인 생략)
+# Force upload (skip confirmation)
 pussh push ./index.html -f
 ```
 
-## 도움말
+## Help
 
-상세한 도움말은 다음 명령어로 확인할 수 있습니다:
+Detailed help can be viewed with the following commands:
 
 ```bash
-# 전체 도움말
+# Overall help
 pussh --help
 pussh help
 
-# 특정 명령어 도움말
+# Specific command help
 pussh help login
 pussh help diff
 pussh help push
 ```
 
-## 세션 관리
+## Server Profiles
 
-로그인 정보는 다음 위치에 저장됩니다:
-- **Linux/Mac**: `~/.config/pussh/config.json`
-- **Windows**: `%APPDATA%\pussh\config.json`
+Manage named server configurations for quick access without entering credentials each time.
 
-## 에러 처리
-
-### "로그인이 필요합니다"
-
-먼저 `pussh login`을 실행하세요:
 ```bash
-pussh login user@server.com 'password' -d ~/project
+# List all registered servers
+pussh server list
+
+# Add a new server interactively
+pussh server add production
+
+# Set default server (used when no explicit server specified)
+pussh server default production
+
+# Remove a server
+pussh server remove test --confirm
 ```
 
-### "파일을 찾을 수 없습니다"
+**Examples:**
+```bash
+# After adding servers:
+pussh login production               # Uses saved credentials
+pussh login production -d /var/www   # Override directory
 
-- 파일 경로가 올바른지 확인하세요
-- 상대 경로 사용: `./filename`
-- 절대 경로 사용: `/absolute/path/filename`
+# Faster file operations:
+pussh diff ./index.html              # Uses default server
+pussh push ./app.js -f               # Uses default server
+```
 
-### "SSH 연결 실패"
+## Configuration Storage
 
-- 호스트 주소가 올바른지 확인하세요 (user@hostname 형식)
-- 비밀번호가 올바른지 확인하세요
-- 서버가 SSH를 사용 가능한지 확인하세요
+Server profiles are stored in:
+- **Linux/Mac**: `~/.pussh/config.json`
+- **Windows**: `%USERPROFILE%\.pussh\config.json`
 
-## 기술 스택
+## Error Handling
 
-- **Node.js** - JavaScript 런타임
-- **commander** - CLI 프레임워크
-- **node-ssh** - SSH 연결
-- **inquirer** - 대화형 프롬프트
-- **chalk** - 터미널 색상 출력
-- **ora** - 로딩 스피너
-- **diff** - 파일 내용 비교
+### "No session found" or "Server not found"
 
-## 라이센스
+First run `pussh login`:
+```bash
+pussh login user@server.com 'password' -d ~/project
+
+# Or use registered server
+pussh server add production
+pussh login production
+```
+
+### "File not found"
+
+- Check if the file path is correct
+- Use relative path: `./filename`
+- Use absolute path: `/absolute/path/filename`
+
+### "SSH connection failed"
+
+- Check if the host address is correct (user@hostname format)
+- Check if the password is correct
+- Check if the server has SSH enabled on the remote host
+- Verify the port is correct (default: 22)
+
+## Tech Stack
+
+- **Node.js** - JavaScript runtime
+- **commander** - CLI framework
+- **node-ssh** - SSH connection
+- **inquirer** - Interactive prompts
+- **chalk** - Terminal color output
+- **ora** - Loading spinner
+- **diff** - File content comparison
+
+## License
 
 ISC
