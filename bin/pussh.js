@@ -3,6 +3,7 @@
 const { program } = require('commander');
 const chalk = require('chalk');
 const figlet = require('figlet');
+const { version } = require('../package.json');
 const loginCommand = require('../lib/commands/login');
 const diffCommand = require('../lib/commands/diff');
 const compareCommand = require('../lib/commands/compare');
@@ -20,7 +21,7 @@ function showBanner() {
 program
   .name('pussh')
   .description('SSH-based file synchronization and deployment tool')
-  .version('1.2.2')
+  .version(version)
   .addHelpCommand('help [command]', 'Show detailed help for a specific command');
 
 // Banner를 먼저 출력하도록 커스터마이징
